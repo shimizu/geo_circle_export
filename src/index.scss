@@ -137,3 +137,68 @@ body {
   font-family: monospace;
   z-index: 10;
 }
+
+#circle-info {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  width: min(320px, calc(100vw - 24px));
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  line-height: 1.6;
+  color: #444;
+  z-index: 10;
+
+  &[hidden] {
+    display: none;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+  }
+
+  button {
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover {
+      color: #222;
+    }
+  }
+
+  p + p {
+    margin-top: 8px;
+  }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    background: rgba(74, 144, 217, 0.08);
+    padding: 1px 4px;
+    border-radius: 4px;
+  }
+
+  .formula {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #1f4f7a;
+  }
+}

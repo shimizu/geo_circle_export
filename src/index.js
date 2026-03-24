@@ -33,6 +33,8 @@ const saveSvgBtn = document.getElementById('save-svg');
 const savePngBtn = document.getElementById('save-png');
 const coordsDisplay = document.getElementById('coords');
 const circleListEl = document.getElementById('circle-list');
+const circleInfoEl = document.getElementById('circle-info');
+const closeCircleInfoBtn = document.getElementById('close-circle-info');
 
 // --- 大圏円GeoJSON生成 ---
 function createGeoCircle(center, radiusKm) {
@@ -266,6 +268,10 @@ saveSvgBtn.addEventListener('click', () => {
 
 savePngBtn.addEventListener('click', () => {
   if (state.map) state.map.savePNG('map');
+});
+
+closeCircleInfoBtn.addEventListener('click', () => {
+  circleInfoEl.hidden = true;
 });
 
 // ウィンドウリサイズ対応

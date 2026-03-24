@@ -37,6 +37,16 @@
 
     <div id="coords">緯度: -- 経度: --</div>
 
+    <aside id="circle-info">
+        <div class="panel-header">
+            <h3>円の計算方法</h3>
+            <button id="close-circle-info" type="button" aria-label="説明を閉じる">&times;</button>
+        </div>
+        <p>円は平面ではなく、地球を球体とみなした球面上で計算しています。</p>
+        <p>指定した半径 km を角距離に変換し、<code>d3.geoCircle()</code> で中心点から等距離の輪郭を生成します。</p>
+        <p class="formula">角距離 (deg) = 半径 (km) × 180 / (π × 6371.0088)</p>
+    </aside>
+
     <script type="module" src="/index.js"></script>
 </body>
 </html>
