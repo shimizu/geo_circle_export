@@ -12,6 +12,8 @@ const state = {
   scale: 1,
 };
 
+const EARTH_RADIUS_KM = 6371.0088;
+
 // --- 投影法マップ ---
 const projectionFactories = {
   naturalEarth: () => d3.geoNaturalEarth1(),
@@ -34,7 +36,7 @@ const circleListEl = document.getElementById('circle-list');
 
 // --- 大圏円GeoJSON生成 ---
 function createGeoCircle(center, radiusKm) {
-  const radiusDeg = radiusKm / 111.32;
+  const radiusDeg = radiusKm * 180 / (Math.PI * EARTH_RADIUS_KM);
   return d3.geoCircle()
     .center(center)
     .radius(radiusDeg)
