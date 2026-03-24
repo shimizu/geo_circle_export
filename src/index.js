@@ -10,6 +10,7 @@ const state = {
   map: null,         // ThematikaMap instance
   rotation: [0, 0, 0],  // [lambda, phi, gamma]
   scale: 1,
+  translate: [0, 0],
 };
 
 const EARTH_RADIUS_KM = 6371.0088;
@@ -78,6 +79,31 @@ function scheduleDraw() {
   });
 }
 
+function applyMapTranslation(svg) {
+  const rootGroup = svg.select('g');
+  if (rootGroup.empty()) return;
+
+  const baseTransform = rootGroup.attr('data-base-transform') ?? rootGroup.attr('transform') ?? '';
+  rootGroup.attr('data-base-transform', baseTransform);
+
+  const translate = `translate(${state.translate[0]}, ${state.translate[1]})`;
+  rootGroup.attr('transform', baseTransform ? `${baseTransform} ${translate}` : translate);
+}
+
+function getProjectedPointer(event) {
+  const [mx, my] = d3.pointer(event);
+  return [mx - state.translate[0], my - state.translate[1]];
+}
+
+function getPointerCoords(event, projection) {
+  const coords = projection.invert(getProjectedPointer(event));
+  if (!coords || isNaN(coords[0]) || isNaN(coords[1])) return null;
+
+  const [lng, lat] = coords;
+  if (lng < -180 || lng > 180 || lat < -90 || lat > 90) return null;
+  return coords;
+}
+
 // --- メイン描画関数 ---
 function draw() {
   const width = mapContainer.clientWidth;
@@ -106,6 +132,8 @@ function draw() {
     backgroundColor: '#f0f4f8',
   });
   state.map = map;
+  const svg = d3.select(map.getSVG());
+  applyMapTranslation(svg);
 
   // レイヤー追加
   const outline = new OutlineLayer({
@@ -154,7 +182,6 @@ function draw() {
     map.addLayer('circles', circleLayer);
 
     // 中心マーカー
-    const svg = d3.select(map.getSVG());
     const g = svg.select('g');
     state.circles.forEach(c => {
       const [x, y] = projection(c.center);
@@ -183,9 +210,10 @@ function setupInteraction(map, projection) {
   const sensitivity = 75;
   let dragStartRotation;
   let dragStartPos;
+  let panStartTranslate;
   let isDragging = false;
 
-  // ドラッグで回転
+  // 左ドラッグで回転
   const drag = d3.drag()
     .on('start', (event) => {
       dragStartRotation = [...state.rotation];
@@ -209,6 +237,37 @@ function setupInteraction(map, projection) {
     .on('end', () => {});
 
   svg.call(drag);
+  svg.on('contextmenu', (event) => {
+    event.preventDefault();
+  });
+
+  // 右ドラッグで平行移動
+  svg.on('mousedown.pan', (event) => {
+    if (event.button !== 2) return;
+
+    event.preventDefault();
+    panStartTranslate = [...state.translate];
+    dragStartPos = [event.clientX, event.clientY];
+    isDragging = false;
+
+    d3.select(window)
+      .on('mousemove.map-pan', (moveEvent) => {
+        const dx = moveEvent.clientX - dragStartPos[0];
+        const dy = moveEvent.clientY - dragStartPos[1];
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+          isDragging = true;
+        }
+
+        state.translate = [
+          panStartTranslate[0] + dx,
+          panStartTranslate[1] + dy,
+        ];
+        applyMapTranslation(svg);
+      })
+      .on('mouseup.map-pan', () => {
+        d3.select(window).on('mousemove.map-pan', null).on('mouseup.map-pan', null);
+      });
+  });
 
   // ホイールでズーム
   svg.on('wheel', (event) => {
@@ -220,28 +279,24 @@ function setupInteraction(map, projection) {
 
   // クリックで円配置（ドラッグでなかった場合のみ）
   svg.on('click', (event) => {
+    if (event.button !== 0) return;
     if (isDragging) {
       isDragging = false;
       return;
     }
 
-    const [mx, my] = d3.pointer(event);
-    const coords = projection.invert([mx, my]);
-    if (!coords || isNaN(coords[0]) || isNaN(coords[1])) return;
-
-    const [lng, lat] = coords;
-    if (lng < -180 || lng > 180 || lat < -90 || lat > 90) return;
+    const coords = getPointerCoords(event, projection);
+    if (!coords) return;
 
     const radiusKm = parseFloat(radiusInput.value) || 4000;
-    state.circles.push({ center: [lng, lat], radiusKm });
+    state.circles.push({ center: coords, radiusKm });
     draw();
   });
 
   // マウス移動で座標表示
   svg.on('mousemove', (event) => {
-    const [mx, my] = d3.pointer(event);
-    const coords = projection.invert([mx, my]);
-    if (coords && !isNaN(coords[0]) && !isNaN(coords[1])) {
+    const coords = getPointerCoords(event, projection);
+    if (coords) {
       coordsDisplay.textContent = `緯度: ${coords[1].toFixed(2)}  経度: ${coords[0].toFixed(2)}`;
     } else {
       coordsDisplay.textContent = '緯度: --  経度: --';
@@ -254,6 +309,7 @@ projSelect.addEventListener('change', () => {
   state.projectionType = projSelect.value;
   state.rotation = [0, 0, 0];
   state.scale = 1;
+  state.translate = [0, 0];
   draw();
 });
 
