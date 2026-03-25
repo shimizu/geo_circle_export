@@ -39,9 +39,18 @@
 
     <aside id="circle-info">
         <div class="panel-header">
-            <h3>円の計算方法</h3>
+            <h3>操作方法</h3>
             <button id="close-circle-info" type="button" aria-label="説明を閉じる">&times;</button>
         </div>
+        <dl class="operation-list">
+            <dt>左クリック</dt><dd>円を配置</dd>
+            <dt>左ドラッグ</dt><dd>地図を回転</dd>
+            <dt>右ドラッグ</dt><dd>地図を平行移動</dd>
+            <dt>ホイール</dt><dd>ズーム</dd>
+            <dt>円リスト項目クリック</dt><dd>その円を中心に表示</dd>
+        </dl>
+
+        <h3>円の計算方法</h3>
         <p>円は平面ではなく、地球を球体とみなした球面上で計算しています。</p>
         <p>指定した半径 km を角距離に変換し、<code>d3.geoCircle()</code> で中心点から等距離の輪郭を生成します。</p>
         <p class="formula">角距離 (deg) = 半径 (km) × 180 / (π × 6371.0088)</p>

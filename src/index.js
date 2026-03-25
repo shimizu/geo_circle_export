@@ -59,8 +59,23 @@ function updateCircleList() {
     circleListEl.appendChild(item);
   });
 
+  // 円アイテムクリックで回転リセット＆中心に移動
+  circleListEl.querySelectorAll('.circle-item').forEach((item, i) => {
+    item.style.cursor = 'pointer';
+    item.addEventListener('click', () => {
+      const c = state.circles[i];
+      // 回転を円の中心に合わせる（経度を反転、緯度はそのまま負に）
+      state.rotation = [-c.center[0], -c.center[1], 0];
+      state.scale = 1;
+      state.translate = [0, 0];
+      draw();
+    });
+  });
+
+  // 削除ボタン（イベント伝播を止めて親のクリックを防ぐ）
   circleListEl.querySelectorAll('.remove-circle').forEach(btn => {
     btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const idx = parseInt(e.target.dataset.index);
       state.circles.splice(idx, 1);
       draw();
