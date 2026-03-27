@@ -11,7 +11,10 @@
     <div id="controls">
         <h3>地図設定</h3>
 
-        <label for="projection-select">投影法</label>
+        <div class="field-header">
+            <label for="projection-select">投影法</label>
+            <button id="reset-rotation" type="button" class="icon-text-btn">reset</button>
+        </div>
         <select id="projection-select">
             <option value="naturalEarth" selected>Natural Earth</option>
             <option value="mercator">メルカトル</option>
@@ -42,13 +45,32 @@
             <h3>操作方法</h3>
             <button id="close-circle-info" type="button" aria-label="説明を閉じる">&times;</button>
         </div>
-        <dl class="operation-list">
-            <dt>左クリック</dt><dd>円を配置</dd>
-            <dt>左ドラッグ</dt><dd>地図を回転</dd>
-            <dt>右ドラッグ</dt><dd>地図を平行移動</dd>
-            <dt>ホイール</dt><dd>ズーム</dd>
-            <dt>円リスト項目クリック</dt><dd>その円を中心に表示</dd>
-        </dl>
+        <ul class="operation-list">
+            <li>
+                <span class="operation-icon text-icon">L</span>
+                <span>左クリックで円を配置</span>
+            </li>
+            <li>
+                <span class="operation-icon text-icon">L+</span>
+                <span>左ドラッグで地図を回転</span>
+            </li>
+            <li>
+                <span class="operation-icon text-icon">R+</span>
+                <span>右ドラッグで地図を平行移動</span>
+            </li>
+            <li>
+                <span class="operation-icon text-icon">W</span>
+                <span>ホイールでズーム</span>
+            </li>
+            <li>
+                <span class="operation-icon image-icon"><img src="./icon/lat.png" alt="" /></span>
+                <span>その円の中心に緯度を合わせる</span>
+            </li>
+            <li>
+                <span class="operation-icon image-icon"><img src="./icon/lng.png" alt="" /></span>
+                <span>その円の中心に経度を合わせる</span>
+            </li>
+        </ul>
 
         <h3>円の計算方法</h3>
         <p>円は平面ではなく、地球を球体とみなした球面上で計算しています。</p>

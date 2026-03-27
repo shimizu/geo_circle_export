@@ -28,6 +28,7 @@ const projectionFactories = {
 // --- DOM要素 ---
 const mapContainer = document.getElementById('map');
 const projSelect = document.getElementById('projection-select');
+const resetRotationBtn = document.getElementById('reset-rotation');
 const radiusInput = document.getElementById('radius-input');
 const clearBtn = document.getElementById('clear-circles');
 const saveSvgBtn = document.getElementById('save-svg');
@@ -53,20 +54,44 @@ function updateCircleList() {
     const item = document.createElement('div');
     item.className = 'circle-item';
     item.innerHTML = `
-      <span>${c.center[1].toFixed(1)}, ${c.center[0].toFixed(1)} / ${c.radiusKm}km</span>
-      <span class="remove-circle" data-index="${i}">&times;</span>
+      <span class="circle-label">${c.center[1].toFixed(1)}, ${c.center[0].toFixed(1)} / ${c.radiusKm}km</span>
+      <span class="circle-actions">
+        <button type="button" class="align-circle" data-axis="lat" data-index="${i}" aria-label="その円の中心に緯度を合わせる">
+          <img src="./icon/lat.png" alt="" />
+        </button>
+        <button type="button" class="align-circle" data-axis="lng" data-index="${i}" aria-label="その円の中心に経度を合わせる">
+          <img src="./icon/lng.png" alt="" />
+        </button>
+        <button type="button" class="remove-circle" data-index="${i}" aria-label="円を削除">&times;</button>
+      </span>
     `;
     circleListEl.appendChild(item);
   });
 
-  // 円アイテムクリックで回転リセット＆中心に移動
-  circleListEl.querySelectorAll('.circle-item').forEach((item, i) => {
-    item.style.cursor = 'pointer';
-    item.addEventListener('click', () => {
-      const c = state.circles[i];
-      // 回転を円の中心に合わせる（経度を反転、緯度はそのまま負に）
-      state.rotation = [-c.center[0], -c.center[1], 0];
-      state.scale = 1;
+  // 円アイテムの操作ボタン
+  circleListEl.querySelectorAll('.align-circle').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(e.currentTarget.dataset.index, 10);
+      const axis = e.currentTarget.dataset.axis;
+      const c = state.circles[idx];
+
+      if (!c) return;
+
+      if (axis === 'lat') {
+        state.rotation = [
+          state.rotation[0],
+          -c.center[1],
+          state.rotation[2],
+        ];
+      } else if (axis === 'lng') {
+        state.rotation = [
+          -c.center[0],
+          state.rotation[1],
+          state.rotation[2],
+        ];
+      }
+
       state.translate = [0, 0];
       draw();
     });
@@ -76,7 +101,7 @@ function updateCircleList() {
   circleListEl.querySelectorAll('.remove-circle').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const idx = parseInt(e.target.dataset.index);
+      const idx = parseInt(e.currentTarget.dataset.index, 10);
       state.circles.splice(idx, 1);
       draw();
     });
@@ -324,6 +349,12 @@ projSelect.addEventListener('change', () => {
   state.projectionType = projSelect.value;
   state.rotation = [0, 0, 0];
   state.scale = 1;
+  state.translate = [0, 0];
+  draw();
+});
+
+resetRotationBtn.addEventListener('click', () => {
+  state.rotation = [0, 0, 0];
   state.translate = [0, 0];
   draw();
 });
